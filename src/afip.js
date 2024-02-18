@@ -109,9 +109,11 @@ function parseCsv(csv) {
   const lines = csv.trim().split("\n")
   const comprobantes = lines.slice(1).map((line) => {
     const values = line.split(";")
+    const tipo = mapTipoComprobante[values[1]] ?? values[1]
+    const impTotal = parseFloat(values[16])
     const comprobante = {
       fechaDeEmision: new Date(values[0]),
-      tipo: mapTipoComprobante[values[1]] ?? values[1],
+      tipo,
       puntoDeVenta: values[2],
       numeroDesde: values[3],
       numeroHasta: values[4],
@@ -126,7 +128,7 @@ function parseCsv(csv) {
       impOpExentas: parseFloat(values[13]),
       otrosTributos: parseFloat(values[14]),
       iva: parseFloat(values[15]),
-      impTotal: parseFloat(values[16]),
+      impTotal: isNota(tipo) ? -impTotal : impTotal,
     }
     return comprobante
   })
@@ -169,3 +171,8 @@ const mapTipoComprobante = {
   212: "Nota de Débito electrónica MiPyMEs (FCE) C",
   213: "Nota de Crédito electrónica MiPyMEs (FCE) C",
 }
+
+/**
+ * @param {string} tipo
+ */
+const isNota = (tipo) => tipo.includes("Nota")
