@@ -12,11 +12,25 @@ const log = defaultLogger.child({ target: "index" })
 async function main() {
   log.info("Starting")
 
+  // Check date, if first day of the month, get previous month's comprobantes
+  const monthSelector = dayjs().date() === 1 ? "previous" : "current"
+  const firstDayOfMonth =
+    monthSelector === "current"
+      ? dayjs().startOf("month").toDate()
+      : dayjs().subtract(1, "month").startOf("month").toDate()
+  const lastDayOfMonth =
+    monthSelector === "current"
+      ? dayjs().endOf("month").toDate()
+      : dayjs().subtract(1, "month").endOf("month").toDate()
+  log.debug({ monthSelector, firstDayOfMonth, lastDayOfMonth }, "Date info")
+
   // Get monthly comprobantes
   log.info("Getting comprobantes")
+
   const comprobantes = await getComprobantes({
     user: env.AFIP_USERNAME,
     password: env.AFIP_PASSWORD,
+    month: monthSelector,
   })
   comprobantes.sort(
     (a, b) => a.fechaDeEmision.getTime() - b.fechaDeEmision.getTime(),
@@ -26,8 +40,8 @@ async function main() {
   log.info("Getting stored comprobantes")
   const storedComprobantes = await db.query.comprobantes.findMany({
     where: and(
-      gte(comprobantesSchema.date, dayjs().startOf("month").toDate()),
-      lte(comprobantesSchema.date, dayjs().endOf("month").toDate()),
+      gte(comprobantesSchema.date, firstDayOfMonth),
+      lte(comprobantesSchema.date, lastDayOfMonth),
     ),
     orderBy: [asc(comprobantesSchema.date)],
   })

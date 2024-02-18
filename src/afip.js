@@ -5,9 +5,13 @@ import { chromium } from "playwright"
 const log = defaultLogger.child({ target: "afip" })
 
 /**
- * @param {{user: string; password: string}} options
+ * @param {{
+ *  user: string
+ *  password: string
+ *  month: "current" | "previous"
+ * }} options
  */
-export async function getComprobantes({ user, password }) {
+export async function getComprobantes({ user, password, month }) {
   log.debug("Launching browser")
   const browser = await chromium.launch()
 
@@ -27,7 +31,7 @@ export async function getComprobantes({ user, password }) {
 
   // Download CSV
   log.debug("Downloading CSV")
-  const zippedCsvPath = await downloadCSV(misComprobantesPage)
+  const zippedCsvPath = await downloadCSV(misComprobantesPage, month)
   log.debug({ zippedCsvPath }, "CSV downloaded")
   const csv = unzip(zippedCsvPath)
   log.debug({ csv }, "CSV unzipped")
@@ -67,11 +71,14 @@ async function openMisComprobantes(page) {
 
 /**
  * @param {import("playwright").Page} page
+ * @param {"current" | "previous"} month
  */
-async function downloadCSV(page) {
+async function downloadCSV(page, month) {
   await page.click("a#btnRecibidos")
   await page.click("input#fechaEmision")
-  await page.click('li[data-range-key="Este Mes"]')
+  await page.click(
+    `li[data-range-key="${month === "current" ? "Este Mes" : "Mes Pasado"}"]`,
+  )
   await page.click("button#buscarComprobantes")
 
   const downloadPromise = page.waitForEvent("download")
