@@ -3,11 +3,17 @@ import { db } from "./db/index.js"
 import { comprobantes as comprobantesSchema } from "./db/schema.js"
 import { sendEmail } from "./email.js"
 import { env } from "./env.js"
+import { defaultLogger } from "./log.js"
 import dayjs from "dayjs"
 import { and, asc, gte, lte } from "drizzle-orm"
 
+const log = defaultLogger.child({ target: "index" })
+
 async function main() {
+  log.info("Starting")
+
   // Get monthly comprobantes
+  log.info("Getting comprobantes")
   const comprobantes = await getComprobantes({
     user: env.AFIP_USERNAME,
     password: env.AFIP_PASSWORD,
@@ -16,9 +22,8 @@ async function main() {
     (a, b) => a.fechaDeEmision.getTime() - b.fechaDeEmision.getTime(),
   )
 
-  console.log({ comprobantes })
-
   // Get stored comprobantes and compare
+  log.info("Getting stored comprobantes")
   const storedComprobantes = await db.query.comprobantes.findMany({
     where: and(
       gte(comprobantesSchema.date, dayjs().startOf("month").toDate()),
@@ -26,8 +31,7 @@ async function main() {
     ),
     orderBy: [asc(comprobantesSchema.date)],
   })
-
-  console.log({ storedComprobantes })
+  log.debug({ storedComprobantes }, "Stored comprobantes retrieved")
 
   // Compare
   const parsedComprobantes = comprobantes.map((comprobante) => ({
@@ -45,16 +49,22 @@ async function main() {
         storedComprobante.type === comprobante.type,
     )
   })
+  log.debug({ newComprobantes }, "New comprobantes parsed")
 
   // Store new comprobantes if any
   if (newComprobantes.length > 0) {
+    log.info("Storing new comprobantes")
     await db.insert(comprobantesSchema).values(newComprobantes)
   }
 
+  // Send email report
+  log.info("Sending email report")
   await sendEmailReport({
     storedComprobantes,
     newComprobantes,
   })
+
+  log.info("Done")
 }
 
 /**

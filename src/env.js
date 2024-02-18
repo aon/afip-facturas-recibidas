@@ -10,6 +10,9 @@ export const env = createEnv({
     EMAIL_HOST_USER: z.string().min(1),
     EMAIL_HOST_PASSWORD: z.string().min(1),
     EMAIL_USE_TLS: z.preprocess((str) => str === "true", z.boolean()),
+    LOG_LEVEL: z
+      .enum(["trace", "debug", "info", "warn", "error", "fatal", "silent"])
+      .optional(),
     NOTIFICATION_TO_EMAIL: z.string().email(),
     NOTIFICATION_FROM_EMAIL: z.string().min(1),
   },

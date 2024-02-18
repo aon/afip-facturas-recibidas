@@ -1,6 +1,9 @@
 import { env } from "./env.js"
+import { defaultLogger } from "./log.js"
 import nodemailer from "nodemailer"
 import { v4 as uuidv4 } from "uuid"
+
+const log = defaultLogger.child({ target: "email" })
 
 const emailClient = nodemailer.createTransport({
   host: env.EMAIL_HOST,
@@ -24,6 +27,8 @@ const emailClient = nodemailer.createTransport({
  * @param {Email} email
  */
 export async function sendEmail({ to, subject, text, html }) {
+  log.info({ to, subject }, "Sending email")
+  log.debug({ text, html }, "Email content")
   await emailClient.sendMail({
     from: env.NOTIFICATION_FROM_EMAIL,
     to,

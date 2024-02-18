@@ -1,30 +1,45 @@
+import { defaultLogger } from "./log.js"
 import AdmZip from "adm-zip"
 import { chromium } from "playwright"
+
+const log = defaultLogger.child({ target: "afip" })
 
 /**
  * @param {{user: string; password: string}} options
  */
 export async function getComprobantes({ user, password }) {
+  log.debug("Launching browser")
   const browser = await chromium.launch()
+
+  log.debug("Creating context and page")
   const context = await browser.newContext({ acceptDownloads: true })
   const page = await context.newPage()
 
+  log.debug("Logging in")
   await login(page, user, password)
 
   // Mis Comprobantes opens a new page, so we need to wait for the event first
+  log.debug("Opening Mis Comprobantes")
   const pagePromise = context.waitForEvent("page")
   await openMisComprobantes(page)
   const misComprobantesPage = await pagePromise
   await misComprobantesPage.waitForLoadState()
 
+  // Download CSV
+  log.debug("Downloading CSV")
   const zippedCsvPath = await downloadCSV(misComprobantesPage)
+  log.debug({ zippedCsvPath }, "CSV downloaded")
   const csv = unzip(zippedCsvPath)
+  log.debug({ csv }, "CSV unzipped")
 
   // Close browser after we're done
+  log.debug("Closing browser")
   await browser.close()
 
   // Parse CSV into helpful data
   const comprobantes = parseCsv(csv)
+
+  log.debug({ comprobantes }, "Comprobantes parsed")
 
   return comprobantes
 }
