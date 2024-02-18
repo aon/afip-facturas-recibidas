@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "moduleResolution": "Bundler",
+    "module": "ES2022"
+  },
+  "include": [".eslintrc.cjs", "**/*.ts", "**/*.cjs", "**/*.mjs", "**/*.js"],
+  "exclude": ["node_modules"]
+}

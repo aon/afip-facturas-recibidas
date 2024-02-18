@@ -1,0 +1,43 @@
+{
+  "name": "afip-facturas-recibidas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "lint": "eslint . --ext .js,.cjs,.mjs,.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type:check": "tsc --noEmit",
+    "ci:prepare": "pnpm run type:check && pnpm run lint && pnpm run format",
+    "db:push": "drizzle-kit push:sqlite",
+    "db:studio": "drizzle-kit studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@t3-oss/env-core": "^0.9.2",
+    "adm-zip": "^0.5.10",
+    "better-sqlite3": "^9.4.1",
+    "dayjs": "^1.11.10",
+    "dotenv": "^16.4.4",
+    "drizzle-orm": "^0.29.3",
+    "playwright": "^1.41.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/adm-zip": "^0.5.5",
+    "@types/better-sqlite3": "^7.6.9",
+    "@types/eslint": "^8.56.2",
+    "@types/node": "^20.11.19",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
+    "drizzle-kit": "^0.20.14",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  }
+}
