@@ -138,6 +138,6 @@ async function sendEmailReport({ storedComprobantes, newComprobantes }) {
 }
 
 main().catch((err) => {
-  console.error(err)
+  log.error(err)
   process.exit(1)
 })
