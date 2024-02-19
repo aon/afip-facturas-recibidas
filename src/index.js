@@ -1,5 +1,6 @@
 import { getComprobantes } from "./afip.js"
 import { db } from "./db/index.js"
+import { migrateDb } from "./db/migrate.js"
 import { comprobantes as comprobantesSchema } from "./db/schema.js"
 import { sendEmail } from "./email.js"
 import { env } from "./env.js"
@@ -11,6 +12,9 @@ const log = defaultLogger.child({ target: "index" })
 
 async function main() {
   log.info("Starting")
+
+  log.info("Migrating database")
+  migrateDb()
 
   // Check date, if first day of the month, get previous month's comprobantes
   const monthSelector = dayjs().date() === 1 ? "previous" : "current"
