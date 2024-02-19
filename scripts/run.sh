@@ -2,9 +2,11 @@
 
 # Source env variables if exist
 echo "Sourcing environment variables if exist"
-if [ -f ../.env ]; then
+if [ -f ..env ]; then
     echo ".env file found. Sourcing it."
-    source ../.env
+    set -o allexport
+    source .env
+    set +o allexport
 fi
 
 # Run the app
